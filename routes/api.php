@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 Route::group(['middleware' => 'auth:api'], function() {
     Route::post('list', 'MessageController@index');
     Route::post('message', 'MessageController@store');
+    Route::post('show/{id}', 'MessageController@show');
 });
 
 Route::group(['middleware' => 'auth:api'], function() {

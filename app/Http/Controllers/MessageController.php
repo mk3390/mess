@@ -33,7 +33,7 @@ class MessageController extends Controller
      */
     public function create()
     {
-        //
+       
     }
 
     /**
@@ -47,16 +47,16 @@ class MessageController extends Controller
         try {
             if($request->for == 'single'){
                 $message = New Message();
-                $message->to_id = $request->from_id;
-                $message->from_id = auth()->user()->id;
+                $message->to_id = auth()->user()->id;
+                $message->from_id =  $request->from_user;
                 $message->message = $request->message;
                 $message->type = $request->type;
                 $message->parent_id = ($request->parent_id)?$request->parent_id:0;
                 $message->save();
             }else{
                 $message = New GroupMessage();
-                $message->group_id = $request->from_id;
-                $message->from = auth()->user()->id;
+                $message->group_id = $request->group_id;
+                $message->from =  $request->from_user;
                 $message->message = $request->message;
                 $message->type = $request->type;
                 $message->parent_id = ($request->parent_id)?$request->parent_id:0;
@@ -77,9 +77,23 @@ class MessageController extends Controller
      * @param  \App\Models\Message  $message
      * @return \Illuminate\Http\Response
      */
-    public function show(Message $message)
+    public function show($id)
     {
-        //
+        try {
+            $message = Message::where(function ($query) {
+                $query->where('from_id', '=', auth()->user()->id)
+                      ->Where('to_id', '=', $id);
+            })->orWhere(function ($query) {
+                $query->where('to_id', '=', auth()->user()->id)
+                      ->Where('from_id', '=', $id);
+            })->get();
+            $data['data'] = $message;
+            $data['message'] = 'list';
+            return  $this->apiResponse($data, 200);
+        } catch (\Exception $e) {
+            $data['message'] = 'error';
+            return  $this->apiResponse($data, 404);
+        }
     }
 
     /**
